@@ -40,6 +40,28 @@ class Driver(object):
         # type: () -> str
         raise NotImplementedError("Please implement this method")
 
+class EdgeDriver(Driver):
+    def __init__(self, name,
+                 version,
+                 os_type,
+                 url,
+                 latest_release_url,
+                 ):
+        super(EdgeDriver, self).__init__(name, version, os_type, url, latest_release_url)
+        # self._edge_release_tag = edge_release_tag
+        # self._os_token = os.getenv("GH_TOKEN", None)
+        # self.auth_header = None
+        # if self._os_token:
+        #     console("GH_TOKEN will be used to perform requests")
+        #     self.auth_header = {'Authorization': f'token {self._os_token}'}
+
+    def get_latest_release_version(self):
+        resp = requests.get(self._latest_release_url)
+        validate_response(resp)
+        text = resp.text.strip()
+        return text.lstrip('/')
+
+
 
 class ChromeDriver(Driver):
     def __init__(self, name, version, os_type, url, latest_release_url,
@@ -57,7 +79,6 @@ class ChromeDriver(Driver):
             self._latest_release_url + '_' + chrome_version(self.chrome_type))
         validate_response(resp)
         return resp.text.rstrip()
-
 
 class GeckoDriver(Driver):
     def __init__(self, name,
@@ -115,9 +136,7 @@ class IEDriver(Driver):
                  url,
                  latest_release_url):
 
-        if os_type == "win64":
-            os_type = "x64"
-        else:
+        if not os_type == "win64":
             os_type = "Win32"
         super(IEDriver, self).__init__(version=version,
                                        os_type=os_type,
